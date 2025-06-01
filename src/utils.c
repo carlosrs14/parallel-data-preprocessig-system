@@ -1,7 +1,4 @@
 #include "../lib/utils.h"
-#include <stdlib.h>
-#include <string.h>
-#include <ctype.h>
 
 extern char **stopwords, **matriz_entrada, **matriz_salida;
 extern int n_stopwords;
@@ -15,6 +12,12 @@ int leer_datos(FILE *file, char **data, int rows, int columns) {
         cont++;
     }
     return cont;
+}
+
+void guardar_datos(FILE *file, char **data, int rows) {
+    for (int i = 0; i < rows; i++) {
+        fprintf(file, "%s\n", data[i]);
+    }
 }
 
 void **asignar_espacio_matriz(int rows, int columns, size_t size) {
@@ -35,7 +38,6 @@ void *asignar_espacio_vector(int tam, size_t size) {
     void * vec = malloc(tam * size );
     return vec;
 }
-
 
 void preprocesar_linea(int i) {
     int count = 0;
