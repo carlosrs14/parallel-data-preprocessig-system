@@ -34,7 +34,7 @@ int main(int argc, char *argv[]) {
     ids = (pthread_t *) asignar_espacio_vector(n_threads, sizeof(pthread_t));
     indices = (int *) asignar_espacio_vector(n_threads, sizeof(int));
     
-    hacer_solucion_barrera(file, file_out);
+    hacer_solucion_espera_activa(file, file_out);
 
     fclose(file);
     fclose(file_stopwords);
