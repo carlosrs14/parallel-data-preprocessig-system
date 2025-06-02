@@ -1,6 +1,7 @@
 #include "../lib/utils.h"
 #include "../lib/solucion_barrera.h"
 #include "../lib/solucion_espera_activa.h"
+#include "../lib/solucion_variable_condicion.h"
 
 char **matriz_entrada, **matriz_salida, **stopwords;
 pthread_t *ids;
@@ -25,8 +26,6 @@ int main(int argc, char *argv[]) {
 
     delta = MAX_COMENTS_TO_READ / n_threads;
 
-    matriz_entrada = (char **) asignar_espacio_matriz(MAX_COMENTS_TO_READ, COLUMNS, sizeof(char));
-    matriz_salida = (char **) asignar_espacio_matriz(MAX_COMENTS_TO_READ, COLUMNS, sizeof(char));
     stopwords = (char **) asignar_espacio_matriz(n_stopwords, MAX_TAM_STOPWORD, sizeof(char));
 
     leer_datos(file_stopwords, stopwords, n_stopwords, MAX_TAM_STOPWORD);
@@ -34,7 +33,7 @@ int main(int argc, char *argv[]) {
     ids = (pthread_t *) asignar_espacio_vector(n_threads, sizeof(pthread_t));
     indices = (int *) asignar_espacio_vector(n_threads, sizeof(int));
     
-    hacer_solucion_espera_activa(file, file_out);
+    hacer_solucion_variable_condicion(file, file_out);
 
     fclose(file);
     fclose(file_stopwords);

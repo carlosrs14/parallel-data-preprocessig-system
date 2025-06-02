@@ -22,6 +22,10 @@ void *preprocesamiento_barrera(void * arg) {
 }
 
 void hacer_solucion_barrera(FILE * file, FILE * file_out) {
+    
+    matriz_entrada = (char **) asignar_espacio_matriz(MAX_COMENTS_TO_READ, COLUMNS, sizeof(char));
+    matriz_salida = (char **) asignar_espacio_matriz(MAX_COMENTS_TO_READ, COLUMNS, sizeof(char));
+    
     pthread_barrier_init(&barrier_start, NULL, n_threads + 1);
     pthread_barrier_init(&barrier_end, NULL, n_threads + 1);
 

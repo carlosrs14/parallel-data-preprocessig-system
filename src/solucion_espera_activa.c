@@ -9,6 +9,10 @@ extern pthread_t *ids;
 int *turnos;
 
 void *preprocesamiento_espera_activa(void *arg) {
+
+    matriz_entrada = (char **) asignar_espacio_matriz(MAX_COMENTS_TO_READ, COLUMNS, sizeof(char));
+    matriz_salida = (char **) asignar_espacio_matriz(MAX_COMENTS_TO_READ, COLUMNS, sizeof(char));
+
     int idx = *((int *) arg);
     int inicio = idx * delta;
     int fin = (idx == n_threads - 1)? MAX_COMENTS_TO_READ: inicio + delta;
