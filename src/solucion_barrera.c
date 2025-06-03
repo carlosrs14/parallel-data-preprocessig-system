@@ -4,6 +4,7 @@ extern char **matriz_entrada, **matriz_salida;
 extern int *indices;
 extern int rows, delta, n_threads, laps;
 extern pthread_t *ids;
+
 pthread_barrier_t barrier_start, barrier_end;
 
 void *preprocesamiento_barrera(void * arg) {
@@ -22,6 +23,9 @@ void *preprocesamiento_barrera(void * arg) {
 }
 
 void hacer_solucion_barrera(FILE * file, FILE * file_out) {
+    
+    ids = (pthread_t *) asignar_espacio_vector(n_threads, sizeof(pthread_t));
+    indices = (int *) asignar_espacio_vector(n_threads, sizeof(int));
     
     matriz_entrada = (char **) asignar_espacio_matriz(MAX_COMENTS_TO_READ, COLUMNS, sizeof(char));
     matriz_salida = (char **) asignar_espacio_matriz(MAX_COMENTS_TO_READ, COLUMNS, sizeof(char));

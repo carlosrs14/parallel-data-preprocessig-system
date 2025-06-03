@@ -13,6 +13,7 @@ void hacer_solucion_barrera(FILE * file, FILE * file_out);
 int main(int argc, char *argv[]) {
     n_threads = atoi(argv[1]);
     FILE * file = fopen(argv[2], "r");
+    char *solucion = argv[3];
     fscanf(file, "%d ", &rows);
 
     laps = rows / MAX_COMENTS_TO_READ;
@@ -30,22 +31,38 @@ int main(int argc, char *argv[]) {
 
     leer_datos(file_stopwords, stopwords, n_stopwords, MAX_TAM_STOPWORD);
     
-    ids = (pthread_t *) asignar_espacio_vector(n_threads, sizeof(pthread_t));
-    indices = (int *) asignar_espacio_vector(n_threads, sizeof(int));
+    int a_liberar = MAX_COMENTS_TO_READ;
     
-    hacer_solucion_variable_condicion(file, file_out);
+    if (strcmp("barrera", solucion) == 0) {
+        printf("haciendo solucion barrera\n");
+        hacer_solucion_barrera(file, file_out);
+    }
+    
+    if (strcmp("variable", solucion) == 0) {
+        printf("haciendo solucion variable de condicion\n");
+        hacer_solucion_variable_condicion(file, file_out);
+        a_liberar = rows;
+    }
 
+    if (strcmp("espera", solucion) == 0) {
+        printf("haciendo solucion espera activa\n");
+        hacer_solucion_espera_activa(file, file_out);
+    }
+    
     fclose(file);
     fclose(file_stopwords);
 
-    free(ids);
-    free(indices);
-
-    for (int i = 0; i < MAX_COMENTS_TO_READ; i++) {
+    for (int i = 0; i < a_liberar; i++) {
         free(matriz_entrada[i]);
         free(matriz_salida[i]);
+    }
+    
+    for (int i = 0; i < n_stopwords; i++) {
         free(stopwords[i]);
     }
+
+    free(ids);
+    free(indices);
 
     free(stopwords);
     free(matriz_entrada);

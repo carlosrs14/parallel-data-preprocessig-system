@@ -10,13 +10,10 @@ int *turnos;
 
 void *preprocesamiento_espera_activa(void *arg) {
 
-    matriz_entrada = (char **) asignar_espacio_matriz(MAX_COMENTS_TO_READ, COLUMNS, sizeof(char));
-    matriz_salida = (char **) asignar_espacio_matriz(MAX_COMENTS_TO_READ, COLUMNS, sizeof(char));
-
     int idx = *((int *) arg);
     int inicio = idx * delta;
     int fin = (idx == n_threads - 1)? MAX_COMENTS_TO_READ: inicio + delta;
-
+    
     for (int i = 0; i < laps; i++) {
         while (turnos[idx]);
         for (int j = inicio; j < fin; j++) {
@@ -29,6 +26,12 @@ void *preprocesamiento_espera_activa(void *arg) {
 }
 
 void hacer_solucion_espera_activa(FILE *file, FILE *file_out) {
+    ids = (pthread_t *) asignar_espacio_vector(n_threads, sizeof(pthread_t));
+    indices = (int *) asignar_espacio_vector(n_threads, sizeof(int));
+
+    matriz_entrada = (char **) asignar_espacio_matriz(MAX_COMENTS_TO_READ, COLUMNS, sizeof(char));
+    matriz_salida = (char **) asignar_espacio_matriz(MAX_COMENTS_TO_READ, COLUMNS, sizeof(char));
+    
     turnos = (int *) asignar_espacio_vector(n_threads, sizeof(int));
     for (int i = 0; i < n_threads; i++) {
         turnos[i] = 1;

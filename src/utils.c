@@ -102,7 +102,7 @@ void preprocesar_linea_to_lower(int linea) {
     }
 }
 
-void preproecesar_linea_numeros(int linea) {
+void preprocesar_linea_numeros(int linea) {
     int count = 0;
     for (int j = 0; j < COLUMNS; j++) {
         char carct = matriz_entrada[linea][j];
@@ -114,7 +114,7 @@ void preproecesar_linea_numeros(int linea) {
     matriz_salida[linea][count] = '\0';
 }
 
-void preproecesar_linea_puntos(int linea) {
+void preprocesar_linea_puntos(int linea) {
     int count = 0;
     for (int j = 0; j < COLUMNS; j++) {
         char carct = matriz_entrada[linea][j];
@@ -125,7 +125,7 @@ void preproecesar_linea_puntos(int linea) {
     matriz_salida[linea][count] = '\0';
 }
 
-void preproecesar_linea_stopwords(int linea) {
+void preprocesar_linea_stopwords(int linea) {
     int count = 0;
     for (int j = 0; j < COLUMNS; j++) {
         char carct = matriz_entrada[linea][j];

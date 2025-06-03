@@ -21,7 +21,7 @@ void **asignar_espacio_matriz(int rows, int columns, size_t size);
 int is_stop_word(char *palabra);
 void preprocesar_linea(int linea);
 void preprocesar_linea_to_lower(int linea);
-void preproecesar_linea_numeros(int linea);
-void preproecesar_linea_puntos(int linea);
-void preproecesar_linea_stopwords(int linea);
+void preprocesar_linea_numeros(int linea);
+void preprocesar_linea_puntos(int linea);
+void preprocesar_linea_stopwords(int linea);
 #endif
