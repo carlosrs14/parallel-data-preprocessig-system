@@ -9,8 +9,9 @@ int *indices;
 int rows, delta, n_threads, n_stopwords, laps;
 
 void hacer_solucion_barrera(FILE * file, FILE * file_out);
-
 int main(int argc, char *argv[]) {
+    struct timespec inicio, fin;
+    clock_gettime(CLOCK_MONOTONIC, &inicio);
     n_threads = atoi(argv[1]);
     FILE * file = fopen(argv[2], "r");
     char *solucion = argv[3];
@@ -20,10 +21,10 @@ int main(int argc, char *argv[]) {
     // validar cuando no es divisor
     if (rows % MAX_COMENTS_TO_READ != 0) laps++;
 
-    FILE * file_stopwords = fopen("../stopwords.txt", "r");
+    FILE * file_stopwords = fopen("stopwords.txt", "r");
     fscanf(file_stopwords, "%d ", &n_stopwords);
     
-    FILE * file_out = fopen("../salida.txt", "w");
+    FILE * file_out = fopen("salida.txt", "w");
 
     delta = MAX_COMENTS_TO_READ / n_threads;
 
@@ -67,6 +68,9 @@ int main(int argc, char *argv[]) {
     free(stopwords);
     free(matriz_entrada);
     free(matriz_salida);
+    clock_gettime(CLOCK_MONOTONIC, &fin);
+    double tiempo = (fin.tv_sec - inicio.tv_sec) + (fin.tv_nsec - inicio.tv_nsec) / 1e9;
+    printf("Tiempo de ejecución: %.6f segundos\n", tiempo);
     return EXIT_SUCCESS;
 }
 

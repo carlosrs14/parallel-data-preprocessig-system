@@ -60,5 +60,5 @@ void hacer_solucion_barrera(FILE * file, FILE * file_out) {
     }
 
     pthread_barrier_destroy(&barrier_start);
-    pthread_barrier_destroy(&barrier_start);
+    pthread_barrier_destroy(&barrier_end);
 }
