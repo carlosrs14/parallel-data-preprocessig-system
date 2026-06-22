@@ -1,3 +1,6 @@
 .vscode
-venv
-env
+venv/
+preprocess
+output.txt
+time.tmp
+*.dSYM
