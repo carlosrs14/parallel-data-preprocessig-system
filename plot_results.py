@@ -3,7 +3,6 @@ import pandas as pd
 import matplotlib.pyplot as plt
 
 def main():
-    # 1. Translate resultados.csv to results.csv if it doesn't exist
     csv_in = 'resultados.csv'
     csv_out = 'results.csv'
 
@@ -11,7 +10,6 @@ def main():
         print(f"Translating {csv_in} to {csv_out}...")
         df = pd.read_csv(csv_in)
         
-        # Rename columns
         column_mapping = {
             'metodo': 'method',
             'nhilos': 'threads',
@@ -22,7 +20,6 @@ def main():
         }
         df = df.rename(columns=column_mapping)
         
-        # Rename method values
         method_mapping = {
             'barrera': 'barrier',
             'variable': 'cond_var',
@@ -33,23 +30,18 @@ def main():
         df.to_csv(csv_out, index=False)
         print("Translation completed.")
 
-    # Check if results.csv exists
     if not os.path.exists(csv_out):
         print(f"Error: {csv_out} not found. Please run the benchmark first.")
         return
 
-    # Read results
     df = pd.read_csv(csv_out)
 
-    # Clean up or handle data types if necessary
     df['time(s)'] = pd.to_numeric(df['time(s)'], errors='coerce')
     df['cpu(%)'] = pd.to_numeric(df['cpu(%)'], errors='coerce')
     df['ram(KB)'] = pd.to_numeric(df['ram(KB)'], errors='coerce')
 
-    # Ensure plots directory exists
     os.makedirs('plots', exist_ok=True)
 
-    # Set custom modern styles/colors
     colors = {
         'barrier': '#3B82F6',   # Premium Blue
         'cond_var': '#10B981',  # Emerald Green
@@ -59,7 +51,6 @@ def main():
     data_sizes = df['data_size'].unique()
     print(f"Available data sizes: {data_sizes}")
 
-    # Generate Execution Time vs Threads
     for size in [10000, 1000000]:
         if size not in data_sizes:
             continue
@@ -85,12 +76,10 @@ def main():
         plt.savefig(f'plots/time_vs_threads_{size}.png', dpi=300)
         plt.close()
 
-    # CPU and RAM comparisons for data size 10000 (largest size with all three methods)
     size_for_metrics = 10000
     if size_for_metrics in data_sizes:
         subset = df[df['data_size'] == size_for_metrics]
         
-        # CPU usage plot
         plt.figure(figsize=(10, 6))
         for method in subset['method'].unique():
             method_data = subset[subset['method'] == method].sort_values(by='threads')
@@ -107,7 +96,6 @@ def main():
         plt.savefig(f'plots/cpu_vs_threads_{size_for_metrics}.png', dpi=300)
         plt.close()
 
-        # RAM usage plot
         plt.figure(figsize=(10, 6))
         for method in subset['method'].unique():
             method_data = subset[subset['method'] == method].sort_values(by='threads')

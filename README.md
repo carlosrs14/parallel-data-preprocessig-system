@@ -1,8 +1,11 @@
 # Parallel Data Preprocessing System
 
 ### Universidad del Magdalena - Systems Engineering
+
 **Course:** Operating Systems
+
 **Topic:** Synchronization and Parallel Processing with `pthread`
+
 **Authors:** Jiménez Rossimar & Rincones Carlos
 
 ---
