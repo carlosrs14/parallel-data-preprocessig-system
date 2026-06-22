@@ -1,76 +1,131 @@
-#include "../lib/utils.h"
-#include "../lib/solucion_barrera.h"
-#include "../lib/solucion_espera_activa.h"
-#include "../lib/solucion_variable_condicion.h"
+#include "../include/utils.h"
+#include "../include/barrier_solution.h"
+#include "../include/busy_wait_solution.h"
+#include "../include/cond_var_solution.h"
 
-char **matriz_entrada, **matriz_salida, **stopwords;
+char **input_matrix, **output_matrix, **stopwords;
 pthread_t *ids;
 int *indices;
-int rows, delta, n_threads, n_stopwords, laps;
+int rows, delta, num_threads, num_stopwords, laps;
+int current_lap_rows;
 
-void hacer_solucion_barrera(FILE * file, FILE * file_out);
 int main(int argc, char *argv[]) {
-    struct timespec inicio, fin;
-    clock_gettime(CLOCK_MONOTONIC, &inicio);
-    n_threads = atoi(argv[1]);
-    FILE * file = fopen(argv[2], "r");
-    char *solucion = argv[3];
-    fscanf(file, "%d ", &rows);
-
-    laps = rows / MAX_COMENTS_TO_READ;
-    // validar cuando no es divisor
-    if (rows % MAX_COMENTS_TO_READ != 0) laps++;
-
-    FILE * file_stopwords = fopen("stopwords.txt", "r");
-    fscanf(file_stopwords, "%d ", &n_stopwords);
-    
-    FILE * file_out = fopen("salida.txt", "w");
-
-    delta = MAX_COMENTS_TO_READ / n_threads;
-
-    stopwords = (char **) asignar_espacio_matriz(n_stopwords, MAX_TAM_STOPWORD, sizeof(char));
-
-    leer_datos(file_stopwords, stopwords, n_stopwords, MAX_TAM_STOPWORD);
-    
-    int a_liberar = MAX_COMENTS_TO_READ;
-    
-    if (strcmp("barrera", solucion) == 0) {
-        printf("haciendo solucion barrera\n");
-        hacer_solucion_barrera(file, file_out);
-    }
-    
-    if (strcmp("variable", solucion) == 0) {
-        printf("haciendo solucion variable de condicion\n");
-        hacer_solucion_variable_condicion(file, file_out);
-        a_liberar = rows;
+    if (argc < 4) {
+        fprintf(stderr, "Usage: %s <num_threads> <input_file> <method: barrier|variable|espera>\n", argv[0]);
+        return EXIT_FAILURE;
     }
 
-    if (strcmp("espera", solucion) == 0) {
-        printf("haciendo solucion espera activa\n");
-        hacer_solucion_espera_activa(file, file_out);
+    struct timespec start, end;
+    clock_gettime(CLOCK_MONOTONIC, &start);
+
+    num_threads = atoi(argv[1]);
+    char *method = argv[3];
+
+    FILE *file = fopen(argv[2], "r");
+    if (!file) {
+        perror("Error opening input file");
+        return EXIT_FAILURE;
+    }
+
+    if (fscanf(file, "%d ", &rows) != 1) {
+        fprintf(stderr, "Error: Could not read rows count from input file\n");
+        fclose(file);
+        return EXIT_FAILURE;
+    }
+
+    laps = rows / MAX_COMMENTS_TO_READ;
+    if (rows % MAX_COMMENTS_TO_READ != 0) {
+        laps++;
+    }
+
+    // Stopwords file was moved to the data/ directory
+    FILE *file_stopwords = fopen("data/stopwords.txt", "r");
+    if (!file_stopwords) {
+        perror("Error opening stopwords file (expected data/stopwords.txt)");
+        fclose(file);
+        return EXIT_FAILURE;
+    }
+
+    if (fscanf(file_stopwords, "%d ", &num_stopwords) != 1) {
+        fprintf(stderr, "Error: Could not read stopwords count from stopwords file\n");
+        fclose(file_stopwords);
+        fclose(file);
+        return EXIT_FAILURE;
+    }
+    
+    FILE *file_out = fopen("output.txt", "w");
+    if (!file_out) {
+        perror("Error opening output file (output.txt)");
+        fclose(file_stopwords);
+        fclose(file);
+        return EXIT_FAILURE;
+    }
+
+    if (num_threads > 0) {
+        delta = MAX_COMMENTS_TO_READ / num_threads;
+        if (delta == 0) {
+            delta = 1;
+        }
+    } else {
+        delta = 1;
+    }
+
+    stopwords = (char **) allocate_matrix(num_stopwords, MAX_STOPWORD_LEN, sizeof(char));
+    read_data(file_stopwords, stopwords, num_stopwords, MAX_STOPWORD_LEN);
+    
+    int free_rows_count = MAX_COMMENTS_TO_READ;
+    
+    if (strcmp("barrier", method) == 0) {
+        printf("Running barrier solution...\n");
+        run_barrier_solution(file, file_out);
+    } else if (strcmp("cond_var", method) == 0) {
+        printf("Running condition variable solution...\n");
+        run_cond_var_solution(file, file_out);
+        free_rows_count = rows;
+    } else if (strcmp("busy_wait", method) == 0) {
+        printf("Running busy-wait solution...\n");
+        run_busy_wait_solution(file, file_out);
+    } else {
+        fprintf(stderr, "Unknown method: %s (choose 'barrier', 'cond_var', or 'busy_wait')\n", method);
+        fclose(file_out);
+        fclose(file_stopwords);
+        fclose(file);
+        for (int i = 0; i < num_stopwords; i++) {
+            free(stopwords[i]);
+        }
+        free(stopwords);
+        return EXIT_FAILURE;
     }
     
     fclose(file);
     fclose(file_stopwords);
+    fclose(file_out);
 
-    for (int i = 0; i < a_liberar; i++) {
-        free(matriz_entrada[i]);
-        free(matriz_salida[i]);
+    // Free resources safely
+    if (input_matrix) {
+        for (int i = 0; i < free_rows_count; i++) {
+            free(input_matrix[i]);
+        }
+        free(input_matrix);
     }
     
-    for (int i = 0; i < n_stopwords; i++) {
+    if (output_matrix) {
+        for (int i = 0; i < free_rows_count; i++) {
+            free(output_matrix[i]);
+        }
+        free(output_matrix);
+    }
+    
+    for (int i = 0; i < num_stopwords; i++) {
         free(stopwords[i]);
     }
+    free(stopwords);
 
     free(ids);
     free(indices);
 
-    free(stopwords);
-    free(matriz_entrada);
-    free(matriz_salida);
-    clock_gettime(CLOCK_MONOTONIC, &fin);
-    double tiempo = (fin.tv_sec - inicio.tv_sec) + (fin.tv_nsec - inicio.tv_nsec) / 1e9;
-    printf("Tiempo de ejecución: %.6f segundos\n", tiempo);
+    clock_gettime(CLOCK_MONOTONIC, &end);
+    double duration = (end.tv_sec - start.tv_sec) + (end.tv_nsec - start.tv_nsec) / 1e9;
+    printf("Execution time: %.6f seconds\n", duration);
     return EXIT_SUCCESS;
 }
-
